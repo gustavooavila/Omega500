@@ -1,0 +1,29 @@
+{
+  "name": "Omega500",
+  "version": "1.0.0",
+  "description": "Ω500 is a library for making canvas-based games. It focuses on providing an architecturally old-school, straightforward set of tools for creating games: primarily for game jams and rapid prototyping. Check out the online examples: http://mrspeaker.github.io/Omega500/.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel Ω -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gustavooavila/Omega500.git"
+  },
+  "keywords": [],
+  "author": "mrspeaker",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gustavooavila/Omega500/issues"
+  },
+  "homepage": "https://github.com/gustavooavila/Omega500#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6"
+  }
+}

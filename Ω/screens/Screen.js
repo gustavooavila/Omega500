@@ -1,174 +1,170 @@
-(function (Ω) {
 
-	"use strict";
+class Screen {
 
-	var Screen = Ω.Class.extend({
+  constructor() {
+    this.loaded = true; // Set to false if you want to do async stuff
+    this.frame = 0;
 
-		loaded: true, // Set to false if you want to do async stuff
-		frame: 0,
+    this.bodies = null; // Holds new bodies to be added next tick
+    this._bodies = null; // Current dictionary of active bodies
+    this._bodies_zindex = null; // Holds zIndex for body dictionary
 
-		bodies: null, // Holds new bodies to be added next tick
-		_bodies: null, // Current dictionary of active bodies
-		_bodies_zindex: null, // Holds zIndex for body dictionary
+    this.camera = null;
+  }
 
-		camera: null,
+  tick() { }
 
-		tick: function () {},
+  _tick() {
 
-		_tick: function () {
+    this.frame++;
 
-			var self = this;
+    if (this._bodies) {
 
-			this.frame++;
+      // Erfph... make this all nicer, yo.
 
-			if (this._bodies) {
+      // Add any new bodies
+      this.bodies = this.bodies.filter(function (r) {
 
-				// Erfph... make this all nicer, yo.
+        const body = r[0];
+        const tag = r[1] || "default";
+        const zIndex = r[2] || 99; //WARNING: index can't be falsey
+        let spliced = false;
+        let i;
 
-				// Add any new bodies
-				this.bodies = this.bodies.filter(function (r) {
+        if (!this._bodies[tag]) {
+          this._bodies[tag] = [];
 
-					var body = r[0],
-						tag = r[1] || "default",
-						zIndex = r[2] || 99, //WARNING: index can't be falsey
-						spliced = false,
-						i;
+          // Re-order the zIndexes
+          for (i = 0; i < this._bodies_zindex.length; i++) {
+            if (zIndex < this._bodies_zindex[i][0]) {
+              this._bodies_zindex.splice(i, 0, [zIndex, tag]);
+              spliced = true;
+              break;
+            }
+          }
+          if (!spliced) {
+            this._bodies_zindex.push([zIndex, tag]);
+          }
+        }
+        this._bodies[tag].push(body);
 
-					if (!this._bodies[tag]) {
-						this._bodies[tag] = [];
+        return false;
 
-						// Re-order the zIndexes
-						for (i = 0; i < this._bodies_zindex.length; i++) {
-							if (zIndex < this._bodies_zindex[i][0]) {
-								this._bodies_zindex.splice(i, 0, [zIndex, tag]);
-								spliced = true;
-								break;
-							}
-						}
-						if (!spliced) {
-							this._bodies_zindex.push([zIndex, tag]);
-						}
-					}
-					this._bodies[tag].push(body);
+      }, this);
 
-					return false;
+      // Tick all the active bodies
+      for (let tag in this._bodies) {
+        this._bodies[tag] = this._bodies[tag].filter(function (body) {
 
-				}, this);
+          // Automagically remove any "remove"d entities
+          var stillAlive = body.tick() && !(body.remove);
 
-				// Tick all the active bodies
-				for (var tag in this._bodies) {
-					this._bodies[tag] = this._bodies[tag].filter(function (body) {
+          // Add any children bodies
+          if (body.bodies) {
+            body.bodies = body.bodies.filter((b) => {
 
-						// Automagically remove any "remove"d entities
-						var stillAlive = body.tick() && !(body.remove);
+              this.add(b[0], b[1], b[2]);
+              return false;
 
-						// Add any children bodies
-						if (body.bodies) {
-							body.bodies = body.bodies.filter(function (b) {
+            });
+          }
+          return stillAlive;
+        });
+      }
+    }
 
-								self.add(b[0], b[1], b[2]);
-								return false;
+    this.tick();
 
-							});
-						}
-						return stillAlive;
-					});
-				}
-			}
+  }
 
-			this.tick();
+  add(body, tag, zIndex) {
 
-		},
+    // "Lazyily" Set up the bodies structure.
+    if (!this._bodies) {
+      this.bodies = [];
+      this._bodies_zindex = [[99, "default"]];
+      this._bodies = {
+        "default": []
+      };
+    }
+    this.bodies.push([body, tag, zIndex]);
 
-		add: function (body, tag, zIndex) {
+    return body;
+  }
 
-			// "Lazyily" Set up the bodies structure.
-			if (!this._bodies) {
-				this.bodies = [];
-				this._bodies_zindex = [[99, "default"]];
-				this._bodies = {
-					"default": []
-				};
-			}
-			this.bodies.push([body, tag, zIndex]);
+  get(tag) {
 
-			return body;
-		},
+    return this._bodies[tag] || [];
 
-		get: function (tag) {
+  }
 
-			return this._bodies[tag] || [];
+  clear(gfx, col) {
 
-		},
+    if (this.camera) {
+      const c = gfx.ctx;
+      c.fillStyle = col;
+      c.fillRect(this.camera.x, this.camera.y, this.camera.w, this.camera.h);
+    }
+    else {
+      gfx.clear(col);
+    }
 
-		clear: function (gfx, col) {
+  }
 
-			if (this.camera) {
-				var c = gfx.ctx;
-				c.fillStyle = col;
-				c.fillRect(this.camera.x, this.camera.y, this.camera.w, this.camera.h);
-			}
-			else {
-				gfx.clear(col);
-			}
+  render(gfx) {
 
-		},
+    const c = gfx.ctx;
 
-		render: function (gfx) {
+    c.fillStyle = "hsl(0, 0%, 0%)";
+    c.fillRect(0, 0, gfx.w, gfx.h);
 
-			var c = gfx.ctx;
+  }
 
-			c.fillStyle = "hsl(0, 0%, 0%)";
-			c.fillRect(0, 0, gfx.w, gfx.h);
+  _render(gfx) {
 
-		},
+    this.renderBG && this.renderBG(gfx);
 
-		_render: function (gfx) {
+    if (this.camera) {
 
-			this.renderBG && this.renderBG(gfx);
+      // Render from camera position
+      this.camera.renderPre(gfx);
+      this.render(gfx, this.camera);
+      if (this._bodies) {
+        var bodies = [];
+        this._bodies_zindex.forEach(function (bz) {
 
-			if (this.camera) {
+          bodies.push(this._bodies[bz[1]]);
 
-				// Render from camera position
-				this.camera.renderPre(gfx);
-				this.render(gfx, this.camera);
-				if (this._bodies) {
-					var bodies = [];
-					this._bodies_zindex.forEach(function(bz) {
+        }, this);
+        this.camera.render(gfx, bodies, true);
+      }
+      this.camera.renderPost(gfx);
 
-						bodies.push(this._bodies[bz[1]]);
+    } else {
 
-					}, this);
-					this.camera.render(gfx, bodies, true);
-				}
-				this.camera.renderPost(gfx);
+      // Render over entire view port
+      this.render(gfx);
 
-			} else {
+      if (this._bodies) {
 
-				// Render over entire view port
-				this.render(gfx);
+        // Render the bodies in zIndex order
+        this._bodies_zindex.forEach(function (bz) {
 
-				if (this._bodies) {
+          this._bodies[bz[1]].forEach(function (b) {
 
-					// Render the bodies in zIndex order
-					this._bodies_zindex.forEach(function(bz) {
+            b.render(gfx);
 
-						this._bodies[bz[1]].forEach(function (b) {
+          }, this);
 
-							b.render(gfx);
+        }, this);
+      }
+    }
 
-						}, this);
+    this.renderFG && this.renderFG(gfx);
 
-					}, this);
-				}
-			}
+  }
 
-			this.renderFG && this.renderFG(gfx);
+}
 
-		}
+module.exports = Screen;
 
-	});
-
-	Ω.Screen = Screen;
-
-}(window.Ω));

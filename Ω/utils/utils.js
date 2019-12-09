@@ -1,8 +1,4 @@
-(function (Ω) {
-
-	"use strict";
-
-	Ω.utils = {
+const utils = {
 
 		rand: function (max, min) {
 
@@ -56,7 +52,7 @@
 
 		neighbours: function (radius, cb, onlyOuterRing) {
 
-			var j, i;
+			let j, i;
 
 			for (j = -radius; j <= radius; j++) {
 				for(i = -radius; i <= radius; i++) {
@@ -71,8 +67,8 @@
 
 		constrain: function (pos, bounds, wrap) {
 
-			var xo = pos[0],
-				yo = pos[1];
+			let xo = pos[0];
+			let	yo = pos[1];
 			if (xo < 0) { xo = wrap ? bounds.w : 0; }
 			if (yo < 0) { yo = wrap ? bounds.h : 0; }
 			if (xo > bounds.w) { xo = wrap ? 0 : bounds.w; }
@@ -85,8 +81,8 @@
 		formatTime: function (t) {
 
 			t /= 1000;
-			var mins = ~~(t / 60),
-				secs = ~~(t - (mins * 60));
+			let mins = ~~(t / 60);
+			let	secs = ~~(t - (mins * 60));
 
 			mins = mins.toString().length === 1 ? "" + mins : mins;
 			secs = secs.toString().length === 1 ? "0" + secs : secs;
@@ -102,12 +98,12 @@
 
 		loadScripts: function (scripts, cb) {
 
-			var loaded = 0;
+			let loaded = 0;
 
 			scripts.forEach(function (path) {
 
-				var script = document.createElement('script'),
-					qs = window.env.desktop ? "?" + new Date().getTime() : "";
+				const script = document.createElement('script');
+				const	qs = window.env.desktop ? "?" + new Date().getTime() : "";
 
 				script.src = "scripts/" + path + ".js" + qs;
 				script.onload = function () {
@@ -201,5 +197,4 @@
 		},
 
 	};
-
-}(window.Ω));
+module.exports = utils;

@@ -1,41 +1,39 @@
-(function (Ω) {
 
-	"use strict";
+class Timer {
 
-	var Timer = Ω.Class.extend({
+  constructor(time, cb, done) {
 
-		init: function (time, cb, done) {
+    global.Ω.timers.add(this);
 
-			Ω.timers.add(this);
+    this.time = time;
+    if (!done) {
+      done = cb;
+      cb = null;
+    }
+    this.max = time;
+    this.cb = cb;
+    this.done = done;
 
-			this.time = time;
-			if (!done) {
-				done = cb;
-				cb = null;
-			}
-			this.max = time;
-			this.cb = cb;
-			this.done = done;
+  }
 
-		},
+  tick() {
 
-		tick: function () {
+    this.time -= 1;
 
-			this.time -= 1;
+    if (this.time < 0) {
+      this.done && this.done();
+      return false;
+    }
+    this.cb && this.cb(1 - (this.time / this.max));
 
-			if (this.time < 0) {
-				this.done && this.done();
-				return false;
-			}
-			this.cb && this.cb(1 - (this.time / this.max));
+    return true;
+  }
 
-			return true;
-		}
+}
 
-	});
+const timer = function (time, cb, done) {
+  return new Timer(time, cb, done);
+};
 
-	Ω.timer = function (time, cb, done) {
-		return new Timer(time, cb, done);
-	};
+module.exports = timer;
 
-}(window.Ω));

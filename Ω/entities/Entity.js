@@ -1,192 +1,170 @@
-(function (Ω) {
 
-	"use strict";
+class Entity {
+  constructor(x = 0, y = 0, w = 32, h = 32) {
 
-	var Entity = Ω.Class.extend({
+    this.xo = 0;
+    this.yo = 0;
 
-		x: 0,
-		y: 0,
-		w: 32,
-		h: 32,
+    this.gravity = 0;
+    this.falling = false;
+    this.wasFalling = false;
 
-		xo: 0,
-		yo: 0,
+    this.remove = false;
 
-		gravity: 0,
-		falling: false,
-		wasFalling: false,
+    this.traits = null;
 
-		remove: false,
+    this.bodies = null; // bodies to be added by the screen
 
-		traits: null,
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
 
-		bodies: null, // bodies to be added by the screen
+    const t = this.traits || [];
+    this.traits = [];
+    this.mixin(t);
 
-		init: function (x, y, w, h) {
+  }
 
-			this.x = x || this.x;
-			this.y = y || this.y;
-			this.w = w || this.w;
-			this.h = h || this.h;
+  tick() {
+    this.traits = this.traits.filter((t) => t.tick.call(this, t));
+    return !(this.remove);
+  }
 
-			var t = this.traits || [];
-			this.traits = [];
-			this.mixin(t);
+  add(body, tag, zIndex) {
+    if (!this.bodies) {
+      this.bodies = [];
+    }
+    this.bodies.push([body, tag, zIndex]);
+    return body;
+  }
 
-		},
+  mixin(traits) {
 
-		tick: function () {
+    traits.forEach(function (t) {
 
-			this.traits = this.traits.filter(function (t) {
+      if (t.trait) {
+        const trait = new t.trait();
+        trait.init_trait.apply(this, [trait].concat(trait.makeArgs(t)));
+        this.traits.push(trait);
+      }
 
-				return t.tick.call(this, t);
+    }, this);
 
-			}, this);
+  }
 
-			return !(this.remove);
+  hit(entity) { }
 
-		},
+  hitBlocks(xBlocks, yBlocks) { }
 
-        add: function (body, tag, zIndex) {
-            if (!this.bodies) {
-                this.bodies = [];
-            }
-            this.bodies.push([body, tag, zIndex]);
-            return body;
-        },
+  moveBy(xo, yo) {
+    this.xo = xo;
+    this.yo = yo;
+  }
 
-		mixin: function (traits) {
+  /*
+    x & y is the amount the entity WANTS to move,
+    if there were no collision with the map.
+  */
+  move(x, y, map) {
 
-			traits.forEach(function (t) {
+    // Temp holder for movement
+    let xo, yo;
 
-				if (t.trait) {
-					var trait = new t.trait();
-					trait.init_trait.apply(this, [trait].concat(trait.makeArgs(t)));
-					this.traits.push(trait);
-				}
+    let xv, yv;
 
-			}, this);
+    let hitX = false;
+    let hitY = false;
 
-		},
+    let xBlocks;
+    let yBlocks;
 
-		hit: function (entity) {},
+    // Apply simple gravity
+    if (this.falling) {
+      y += this.gravity;
+    }
+    xo = x;
+    yo = y;
 
-		hitBlocks: function (xBlocks, yBlocks) {},
+    xv = this.x + xo;
+    yv = this.y + yo;
 
-		moveBy: function (xo, yo) {
+    // check blocks given vertical movement TL, BL, TR, BR
+    yBlocks = map.getBlocks([
+      [this.x, yv],
+      [this.x, yv + (this.h - 1)],
+      [this.x + (this.w - 1), yv],
+      [this.x + (this.w - 1), yv + (this.h - 1)]
+    ]);
 
-			this.xo = xo;
-			this.yo = yo;
+    // if overlapping edges, move back a little
+    if (y < 0 && (yBlocks[0] > map.walkable || yBlocks[2] > map.walkable)) {
+      // Hmmm... why only this guy needs to be floored?
+      yo = map.getBlockEdge((yv | 0) + map.sheet.h, "VERT") - this.y;
+      hitY = true;
+    }
+    if (y > 0 && (yBlocks[1] > map.walkable || yBlocks[3] > map.walkable)) {
+      yo = map.getBlockEdge(yv + this.h, "VERT") - this.y - this.h;
+      hitY = true;
+    }
 
-		},
+    // Add the allowed Y movement
+    this.y += yo;
 
-		/*
-			x & y is the amount the entity WANTS to move,
-			if there were no collision with the map.
-		*/
-		move: function (x, y, map) {
+    // Now check blocks given horizontal movement TL, BL, TR, BR
+    xBlocks = map.getBlocks([
+      [xv, this.y],
+      [xv, this.y + (this.h - 1)],
+      [xv + (this.w - 1), this.y],
+      [xv + (this.w - 1), this.y + (this.h - 1)]
+    ]);
 
-			// Temp holder for movement
-			var xo,
-				yo,
+    // if overlapping edges, move back a little
+    if (x < 0 && (xBlocks[0] > map.walkable || xBlocks[1] > map.walkable)) {
+      xo = map.getBlockEdge(xv + map.sheet.w) - this.x;
+      hitX = true;
+    }
+    if (x > 0 && (xBlocks[2] > map.walkable || xBlocks[3] > map.walkable)) {
+      xo = map.getBlockEdge(xv + this.w) - this.x - this.w;
+      hitX = true;
+    }
 
-				xv,
-				yv,
+    if (hitX || hitY) {
+      this.hitBlocks(hitX ? xBlocks : null, hitY ? yBlocks : null);
+    }
 
-				hitX = false,
-				hitY = false,
+    // Add the allowed X movement
+    this.x += xo;
 
-				xBlocks,
-				yBlocks;
+    // check if we're falling
+    yBlocks = map.getBlocks([
+      [this.x, this.y + this.h],
+      [this.x + (this.w - 1), this.y + this.h]
+    ]);
 
-			// Apply simple gravity
-			if (this.falling) {
-				y += this.gravity;
-			}
-			xo = x;
-			yo = y;
+    this.wasFalling = this.falling;
+    if (yBlocks[0] <= map.walkable && yBlocks[1] <= map.walkable) {
+      this.falling = true;
+    } else {
+      this.falling = false;
+    }
 
-			xv = this.x + xo;
-			yv = this.y + yo;
+    // Reset offset amount
+    this.xo = 0;
+    this.yo = 0;
 
-			// check blocks given vertical movement TL, BL, TR, BR
-			yBlocks = map.getBlocks([
-				[this.x, yv],
-				[this.x, yv + (this.h - 1)],
-				[this.x + (this.w - 1), yv],
-				[this.x + (this.w - 1), yv + (this.h - 1)]
-			]);
+    return [xo, yo];
+  }
 
-			// if overlapping edges, move back a little
-			if (y < 0 && (yBlocks[0] > map.walkable || yBlocks[2] > map.walkable)) {
-				// Hmmm... why only this guy needs to be floored?
-				yo = map.getBlockEdge((yv | 0) + map.sheet.h, "VERT") - this.y;
-				hitY = true;
-			}
-			if (y > 0 && (yBlocks[1] > map.walkable || yBlocks[3] > map.walkable)) {
-				yo = map.getBlockEdge(yv + this.h, "VERT") - this.y - this.h;
-				hitY = true;
-			}
+  render(gfx) {
 
-			// Add the allowed Y movement
-			this.y += yo;
+    const c = gfx.ctx;
 
-			// Now check blocks given horizontal movement TL, BL, TR, BR
-			xBlocks = map.getBlocks([
-				[xv, this.y],
-				[xv, this.y + (this.h - 1)],
-				[xv + (this.w - 1), this.y],
-				[xv + (this.w - 1), this.y + (this.h - 1)]
-			]);
+    c.fillStyle = "#c00";
+    c.fillRect(this.x, this.y, this.w, this.h);
 
-			// if overlapping edges, move back a little
-			if (x < 0 && (xBlocks[0] > map.walkable || xBlocks[1] > map.walkable)) {
-				xo = map.getBlockEdge(xv + map.sheet.w) - this.x;
-				hitX = true;
-			}
-			if (x > 0 && (xBlocks[2] > map.walkable || xBlocks[3] > map.walkable)) {
-				xo = map.getBlockEdge(xv + this.w) - this.x - this.w;
-				hitX = true;
-			}
+  }
 
-			if (hitX || hitY) {
-				this.hitBlocks(hitX ? xBlocks : null, hitY ? yBlocks : null);
-			}
+}
 
-			// Add the allowed X movement
-			this.x += xo;
-
-			// check if we're falling
-			yBlocks = map.getBlocks([
-				[this.x, this.y + this.h],
-				[this.x + (this.w - 1), this.y + this.h]
-			]);
-
-			this.wasFalling = this.falling;
-			if (yBlocks[0] <= map.walkable && yBlocks[1] <= map.walkable) {
-				this.falling = true;
-			} else {
-				this.falling = false;
-			}
-
-			// Reset offset amount
-			this.xo = 0;
-			this.yo = 0;
-
-			return [xo, yo];
-		},
-
-		render: function (gfx) {
-
-			var c = gfx.ctx;
-
-			c.fillStyle = "#c00";
-			c.fillRect(this.x, this.y, this.w, this.h);
-
-		}
-
-	});
-
-	Ω.Entity = Entity;
-
-}(window.Ω));
+module.exports = Entity;

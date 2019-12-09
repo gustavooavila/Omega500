@@ -1,124 +1,104 @@
-var Ω = (function() {
+let preloading = true;
+let pageLoaded = false;
+let assetsToLoad = 0;
+let maxAssets = 0;
+let timers = [];
 
-	"use strict";
+const Ω = {
 
-	var preloading = true,
-		pageLoaded = false,
-		assetsToLoad = 0,
-		maxAssets = 0,
-		timers = [];
+  evt: {
+    onloads: [],
+    progress: [],
+    onload: function (func) {
+      if (!pageLoaded) {
+        this.onloads.push(func);
+      } else {
+        // Page already loaded... so call it up.
+        func();
+      }
+    }
+  },
 
-	return {
+  env: {
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0
+  },
 
-		evt: {
-			onloads: [],
-			progress: [],
-			onload: function(func) {
-				if (!pageLoaded) {
-					this.onloads.push(func);
-				} else {
-					// Page already loaded... so call it up.
-					func();
-				}
-			}
-		},
+  preload: function (name) {
 
-		env: {
-			x: 0,
-			y: 0,
-			w: 0,
-			h: 0
-		},
+    if (!preloading) {
+      return function () {
+        // console.log("preloading finished!", name);
+      };
+    }
 
-		preload: function (name) {
+    maxAssets = Math.max(++assetsToLoad, maxAssets);
 
-			if (!preloading) {
-				return function () {
-					// console.log("preloading finished!", name);
-				};
-			}
+    return () => {
 
-			maxAssets = Math.max(++assetsToLoad, maxAssets);
+      assetsToLoad -= 1;
 
-			return function () {
+      this.evt.progress.map((p) => p(assetsToLoad, maxAssets));
 
-				assetsToLoad -= 1;
+      if (assetsToLoad === 0 && pageLoaded) {
+        if (!preloading) {
+          console.error("Preloading finished (onload called) multiple times!");
+        }
 
-				Ω.evt.progress.map(function (p) {
-					return p(assetsToLoad, maxAssets);
-				});
+        preloading = false;
+        this.evt.onloads.map((o) => { o(); });
+      }
+    };
+  },
 
-				if (assetsToLoad === 0 && pageLoaded) {
-					if (!preloading) {
-						console.error("Preloading finished (onload called) multiple times!");
-					}
+  pageLoad: function () {
 
-					preloading = false;
-					Ω.evt.onloads.map(function (o) {
-						o();
-					});
-				}
+    pageLoaded = true;
 
-			};
-		},
+    if (maxAssets === 0 || assetsToLoad === 0) {
+      // No assets to load, so fire onload
+      preloading = false;
+      this.evt.onloads.map((o) => { o(); });
+    }
 
-		pageLoad: function () {
+  },
 
-			pageLoaded = true;
+  timers: {
 
-			if (maxAssets === 0 || assetsToLoad === 0) {
-				// No assets to load, so fire onload
-				preloading = false;
-				Ω.evt.onloads.map(function (o) {
-					o();
-				});
-			}
+    add: function (timer) {
 
-		},
+      timers.push(timer);
 
-		timers: {
+    },
 
-			add: function (timer) {
+    tick: function () {
 
-				timers.push(timer);
+      timers = timers.filter((t) => t.tick());
 
-			},
+    }
 
-			tick: function () {
+  },
 
-				timers = timers.filter(function (t) {
+  urlParams: (function () {
+    if (!window.location && !window.location.search) {
+      return {};
+    }
+    const params = {};
+    let match;
+    const pl = /\+/g;  // Regex for replacing addition symbol with a space
+    const search = /([^&=]+)=?([^&]*)/g;
+    const decode = (s) => decodeURIComponent(s.replace(pl, " "));
+    const query = window.location.search.substring(1);
 
-					return t.tick();
+    while (match = search.exec(query)) {
+      params[decode(match[1])] = decode(match[2]);
+    }
 
-				});
+    return params;
+  }())
 
-			}
+};
 
-		},
-
-		urlParams: (function () {
-			if (!window.location && !window.location.search) {
-				return {};
-			}
-			var params = {},
-				match,
-				pl = /\+/g,  // Regex for replacing addition symbol with a space
-				search = /([^&=]+)=?([^&]*)/g,
-				decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
-				query = window.location.search.substring(1);
-
-			while (match = search.exec(query)) {
-			   params[decode(match[1])] = decode(match[2]);
-			}
-
-			return params;
-		}())
-
-	};
-
-}());
-
-// Polyfills
-Array.isArray || (Array.isArray = function (a){ return '' + a !== a && {}.toString.call(a) == '[object Array]' });
-window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame;
-
+module.exports = Ω

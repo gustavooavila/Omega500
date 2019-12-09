@@ -1,55 +1,51 @@
-(function (Ω) {
+const input = require("../input/input");
 
-	"use strict";
+class Dialog  {
 
-	var Dialog = Ω.Class.extend({
+  constructor(key, cb) {
 
-		killKey: "escape",
-		time: 0,
+    this.killKey = "escape";
+    this.time = 0;
 
-		init: function (key, cb) {
+    if (typeof key === "function") {
+      cb = key;
+      key = null;
+    }
 
-			if (typeof key === "function") {
-				cb = key;
-				key = null;
-			}
+    if (key) {
+      this.killKey = key;
+    }
+    this.cb = cb;
 
-			if (key) {
-				this.killKey = key;
-			}
-			this.cb = cb;
+  }
 
-		},
+  tick(delta) {
 
-		tick: function (delta) {
+    this.time += delta;
 
-			this.time += delta;
+    if (this.killKey && Ω.input.pressed(this.killKey)) {
+      input.release(this.killKey);
+      this.done();
+    }
 
-			if (this.killKey && Ω.input.pressed(this.killKey)) {
-				Ω.input.release(this.killKey);
-				this.done();
-			}
+  }
 
-		},
+  done () {
 
-		done: function () {
+    window.game.clearDialog();
+    this.cb && this.cb();
 
-			window.game.clearDialog();
-			this.cb && this.cb();
+  }
 
-		},
+  render(gfx) {
 
-		render: function (gfx) {
+    const c = gfx.ctx;
 
-			var c = gfx.ctx;
+    c.fillStyle = "rgba(0, 0, 0, 0.7)";
+    c.fillRect(gfx.w * 0.15, gfx.h * 0.25, gfx.w * 0.7, gfx.h * 0.5);
 
-			c.fillStyle = "rgba(0, 0, 0, 0.7)";
-			c.fillRect(gfx.w * 0.15, gfx.h * 0.25, gfx.w * 0.7, gfx.h * 0.5);
+  }
 
-		}
+}
 
-	});
-
-	Ω.Dialog = Dialog;
-
-}(window.Ω));
+module.exports = Dialog;

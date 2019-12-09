@@ -1,10 +1,6 @@
-(function (Ω) {
+	const images = {};
 
-	"use strict";
-
-	var images = {};
-
-	var gfx = {
+	const gfx = {
 
 		init: function (ctx) {
 
@@ -19,7 +15,7 @@
 		loadImage: function (path, cb, flipFlags) {
 
 			// TODO: don't need to reload if non-flipped image exists
-			var cachedImage = images[path + (flipFlags ? ":" + flipFlags : "")];
+			const cachedImage = images[path + (flipFlags ? ":" + flipFlags : "")];
 
 			if (cachedImage) {
 				if (!cachedImage._loaded) {
@@ -35,15 +31,14 @@
 				return;
 			}
 
-			var resolve = Ω.preload(path),
-				image = new Image(),
-				self = this,
-				onload = function () {
+			const  resolve = global.Ω.preload(path);
+				const image = new Image();
+				const onload = ()=> {
 
-					var procImage;
+					let procImage;
 
 					if (flipFlags >= 0) {
-						procImage = self.flipImage(image, flipFlags);
+						procImage = this.flipImage(image, flipFlags);
 					}
 
 					this._loaded = true;
@@ -77,7 +72,7 @@
 
 		flipImage: function (img, flags) {
 
-			var ctx = this.createCanvas(img.width, img.height);
+			const ctx = this.createCanvas(img.width, img.height);
 
 			// flip x = 1, y = 2, both = 3, none = 0
 			ctx.save();
@@ -91,8 +86,8 @@
 		},
 
 		clear: function (color, alpha) {
-			var c = this.ctx,
-				oldAlpha;
+			const c = this.ctx;
+			let	oldAlpha;
 			alpha = alpha === undefined ? 1 : alpha;
 			if (alpha !== 1) {
 				oldAlpha = c.globalAlpha;
@@ -107,8 +102,8 @@
 
 		createCanvas: function (w, h) {
 
-			var cn = document.createElement("canvas"),
-				ctx = cn.getContext("2d");
+			const cn = document.createElement("canvas");
+			const	ctx = cn.getContext("2d");
 
 			cn.setAttribute("width", w);
 			cn.setAttribute("height", h);
@@ -125,7 +120,7 @@
 
 			drawShadowed: function (msg, x, y, shadow, font) {
 
-				var c = gfx.ctx;
+				const c = gfx.ctx;
 
 				shadow = shadow || 2;
 				if (font) {
@@ -167,6 +162,5 @@
 
 	};
 
-	Ω.gfx = gfx;
+	module.exports = gfx;
 
-}(window.Ω));

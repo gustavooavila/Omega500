@@ -1,19 +1,14 @@
-(function (Ω) {
+  const gfx = require("../gfx/gfx");
+  class Image {
 
-	"use strict";
-
-	var Image = Ω.Class.extend({
-
-		w: 0,
-		h: 0,
-
-		init: function (path, flipFlags, scale) {
-
-			var self = this;
+		constructor (path, flipFlags, scale) {
+      this.w= 0;
+      this.h= 0;
+			
 
 			this.path = path;
 
-			Ω.gfx.loadImage(path, function (img){
+			gfx.loadImage(path, function (img){
 
 				self.img = img;
 				self.w = img.width * self.scale;
@@ -23,9 +18,9 @@
 
 			this.scale = scale || 1;
 
-		},
+		}
 
-		render: function (gfx, x, y) {
+		render (gfx, x, y) {
 
 			gfx.ctx.drawImage(
 				this.img,
@@ -37,8 +32,6 @@
 
 		}
 
-	});
+	}
 
-	Ω.Image = Image;
-
-}(window.Ω));
+	module.exports = Image;
