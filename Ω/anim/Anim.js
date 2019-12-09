@@ -1,64 +1,59 @@
-(function (Ω) {
+const utils = require("../utils/utils");
 
-	"use strict";
+class Anim {
+  constructor(name, sheet, speed, frames, cb) {
 
-	var Anim = Ω.Class.extend({
+    this.name = name;
+    this.sheet = sheet;
+    this.frames = frames;
+    this.speed = speed;
+    this.cb = cb;
 
-		init: function (name, sheet, speed, frames, cb) {
+    this.scale = 1;
+    this.changed = false;
+    this.rewound = false;
 
-			this.name = name;
-			this.sheet = sheet;
-			this.frames = frames;
-			this.speed = speed;
-			this.cb = cb;
+    this.reset();
 
-			this.scale = 1;
-			this.changed = false;
-			this.rewound = false;
+  }
 
-			this.reset();
+  tick() {
 
-		},
+    const diff = utils.now() - this.frameTime;
+    this.changed = false;
+    this.rewound = false;
 
-		tick: function () {
+    if (diff > this.speed) {
+      this.frameTime = Ω.utils.now() + (Math.min(this.speed, diff - this.speed));
+      if (++this.curFrame > this.frames.length - 1) {
+        this.curFrame = 0;
+        this.rewound = true;
+        this.cb && this.cb();
+      };
+      this.changed = true;
+    }
 
-			var diff = Ω.utils.now() - this.frameTime;
-			this.changed = false;
-			this.rewound = false;
+  }
 
-			if (diff > this.speed) {
-				this.frameTime = Ω.utils.now() + (Math.min(this.speed, diff - this.speed));
-				if (++this.curFrame > this.frames.length - 1) {
-					this.curFrame = 0;
-					this.rewound = true;
-					this.cb && this.cb();
-				};
-				this.changed = true;
-			}
+  reset() {
+    this.curFrame = 0;
+    this.frameTime = Ω.utils.now();
+  }
 
-		},
+  render(gfx, x, y) {
 
-		reset: function () {
-			this.curFrame = 0;
-			this.frameTime = Ω.utils.now();
-		},
+    this.sheet.render(
+      gfx,
+      this.frames[this.curFrame][0],
+      this.frames[this.curFrame][1],
+      x,
+      y,
+      1,
+      1,
+      this.scale);
 
-		render: function (gfx, x, y) {
+  }
 
-			this.sheet.render(
-				gfx,
-				this.frames[this.curFrame][0],
-				this.frames[this.curFrame][1],
-				x,
-				y,
-				1,
-				1,
-				this.scale);
+}
 
-		}
-
-	});
-
-	Ω.Anim = Anim;
-
-}(window.Ω));
+module.exports = Anim;

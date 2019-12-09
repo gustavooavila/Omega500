@@ -1,29 +1,18 @@
-(function (Ω) {
+class Trait {
 
-	"use strict";
+  // Convert a property list to an argument array
+  // based on the nees of the trait.
+  makeArgs() {
+    return [];
+  }
 
-	var Trait = Ω.Class.extend({
+  constructor() { }
 
-		// Convert a property list to an argument array
-		// based on the nees of the trait.
-		makeArgs: function () {
+  init_trait() { }
 
-			return [];
+  tick() {
+    return true;
+  }
 
-		},
-
-		init: function () {},
-
-		init_trait: function () {},
-
-		tick: function () {
-
-			return true;
-
-		}
-
-	});
-
-	Ω.Trait = Trait;
-
-}(window.Ω));
+}
+module.exports = Trait;

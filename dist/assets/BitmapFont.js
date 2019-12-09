@@ -8,13 +8,13 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var SpriteSheet = require("../assets/SpriteSheet");
 
-var Font =
+var BitmapFont =
 /*#__PURE__*/
 function () {
-  function Font(path, w, h) {
+  function BitmapFont(path, w, h) {
     var map = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : " !\"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmnopqrstuvwxyz[/]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    _classCallCheck(this, Font);
+    _classCallCheck(this, BitmapFont);
 
     this.sheet = new SpriteSheet(path, w, h);
     this.map = map.split("").map(function (c) {
@@ -24,7 +24,7 @@ function () {
     this.h = h;
   }
 
-  _createClass(Font, [{
+  _createClass(BitmapFont, [{
     key: "render",
     value: function render(gfx, msg, x, y) {
       if (!msg) {
@@ -47,7 +47,7 @@ function () {
     }
   }]);
 
-  return Font;
+  return BitmapFont;
 }();
 
-module.exports = Font;
+module.exports = BitmapFont;

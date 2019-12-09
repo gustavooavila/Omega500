@@ -1,22 +1,34 @@
 "use strict";
 
-(function (Ω) {
-  "use strict";
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  var Anim = Ω.Class.extend({
-    init: function init(name, sheet, speed, frames, cb) {
-      this.name = name;
-      this.sheet = sheet;
-      this.frames = frames;
-      this.speed = speed;
-      this.cb = cb;
-      this.scale = 1;
-      this.changed = false;
-      this.rewound = false;
-      this.reset();
-    },
-    tick: function tick() {
-      var diff = Ω.utils.now() - this.frameTime;
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var utils = require("../utils/utils");
+
+var Anim =
+/*#__PURE__*/
+function () {
+  function Anim(name, sheet, speed, frames, cb) {
+    _classCallCheck(this, Anim);
+
+    this.name = name;
+    this.sheet = sheet;
+    this.frames = frames;
+    this.speed = speed;
+    this.cb = cb;
+    this.scale = 1;
+    this.changed = false;
+    this.rewound = false;
+    this.reset();
+  }
+
+  _createClass(Anim, [{
+    key: "tick",
+    value: function tick() {
+      var diff = utils.now() - this.frameTime;
       this.changed = false;
       this.rewound = false;
 
@@ -32,14 +44,21 @@
         ;
         this.changed = true;
       }
-    },
-    reset: function reset() {
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
       this.curFrame = 0;
       this.frameTime = Ω.utils.now();
-    },
-    render: function render(gfx, x, y) {
+    }
+  }, {
+    key: "render",
+    value: function render(gfx, x, y) {
       this.sheet.render(gfx, this.frames[this.curFrame][0], this.frames[this.curFrame][1], x, y, 1, 1, this.scale);
     }
-  });
-  Ω.Anim = Anim;
-})(window.Ω);
+  }]);
+
+  return Anim;
+}();
+
+module.exports = Anim;

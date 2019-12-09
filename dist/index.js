@@ -8,6 +8,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var Ω = require("./Ω");
 
+var anim = require("./anim/index");
+
 var assets = require("./assets/index");
 
 var entities = require("./entities/index");
@@ -23,6 +25,6 @@ var utils = require("./utils/index");
 var Game = require("./Game");
 
 global.Ω = Ω;
-module.exports = _objectSpread({}, Ω, {}, assets, {}, entities, {}, gfx, {}, input, {}, screens, {}, utils, {
+module.exports = _objectSpread({}, Ω, {}, anim, {}, assets, {}, entities, {}, gfx, {}, input, {}, screens, {}, utils, {
   Game: Game
 });
