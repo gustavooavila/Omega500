@@ -1,98 +1,73 @@
-(function (Ω) {
+class Camera {
+  constructor(x = 0, y = 0, w = 0, h = 0) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
 
-	"use strict";
+    this.zoom = 1;
+    this.debug = false;
+  }
 
-	var Camera = Ω.Class.extend({
+  tick() { }
 
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0,
+  moveTo(x, y) {
+    this.x = x;
+    this.y = y;
+  }
 
-		debug: false,
+  moveBy(x, y) {
+    this.x += x;
+    this.y += y;
+  }
 
-		init: function (x, y, w, h) {
+  renderPre(gfx) {
+    const c = gfx.ctx;
+    
+    c.save();
+    c.scale(this.zoom, this.zoom);
+    c.translate(-(Math.round(this.x)), -(Math.round(this.y)));
+  }
 
-			this.x = x;
-			this.y = y;
-			this.w = w;
-			this.h = h;
-			this.zoom = 1;
+  renderPost(gfx) {
+    const c = gfx.ctx;
 
-		},
+    if (this.debug) {
+      c.strokeStyle = "red";
+      c.strokeRect(this.x, this.y, this.w / this.zoom, this.h / this.zoom);
+    }
 
-		tick: function () {},
+    c.restore();
+  }
 
-		moveTo: function (x, y) {
-			this.x = x;
-			this.y = y;
-		},
+  render(gfx, renderables, noPrePost) {
+    !noPrePost && this.renderPre(gfx);
 
-		moveBy: function (x, y) {
-			this.x += x;
-			this.y += y;
-		},
+    renderables
+      // Flatten to an array
+      .reduce((acc, e) => {
+        if (Array.isArray(e)) {
+          return acc.concat(e);
+        }
+        acc.push(e);
+        return acc;
+      }, [])
+      // Remove out-of-view entities
+      // TODO: maybe use quad tree for this?
+      .filter((r) =>
+        r.repeat || !(
+          r.x + r.w < this.x ||
+          r.y + r.h < this.y ||
+          r.x > this.x + (this.w / this.zoom) ||
+          r.y > this.y + (this.h / this.zoom))
+      )
+      // Draw 'em
+      .forEach((r) => {
+        r.render(gfx, this);
+      });
+    !noPrePost && this.renderPost(gfx);
+  }
 
-		renderPre: function (gfx) {
-			var c = gfx.ctx;
+}
 
-			c.save();
-			c.scale(this.zoom, this.zoom);
-			c.translate(-(Math.round(this.x)), -(Math.round(this.y)));
-
-		},
-
-		renderPost: function (gfx) {
-			var c = gfx.ctx;
-
-			if (this.debug) {
-				c.strokeStyle = "red";
-				c.strokeRect(this.x, this.y, this.w / this.zoom, this.h / this.zoom);
-			}
-
-			c.restore();
-		},
-
-		render: function (gfx, renderables, noPrePost) {
-
-			var self = this;
-
-			!noPrePost && this.renderPre(gfx);
-
-			renderables
-				// Flatten to an array
-				.reduce(function (ac, e) {
-
-					if (Array.isArray(e)) {
-						return ac.concat(e);
-					}
-					ac.push(e);
-					return ac;
-
-				}, [])
-				// Remove out-of-view entites
-				.filter(function (r) {
-
-					return r.repeat || !(
-						r.x + r.w < self.x ||
-						r.y + r.h < self.y ||
-						r.x > self.x + (self.w / self.zoom) ||
-						r.y > self.y + (self.h / self.zoom));
-
-				})
-				// Draw 'em
-				.forEach(function (r) {
-
-					r.render(gfx, self);
-
-				});
-
-			!noPrePost && this.renderPost(gfx);
-
-		}
-
-	});
-
-	Ω.Camera = Camera;
-
-}(window.Ω));
+module.exports = Camera;

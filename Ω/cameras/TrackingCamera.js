@@ -1,109 +1,93 @@
-(function (Ω) {
+const Camera = require("./Camera");
+const math = require('../utils/math');
 
-	"use strict";
+class TrackingCamera extends Camera {
+  constructor(entity, w = 0, h = 0, bounds) {
+    super(0, 0, w, h);
 
-	var TrackingCamera = Ω.Camera.extend({
+    this.xRange = 40;
+    this.yRange = 30;
 
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0,
-		xRange: 40,
-		yRange: 30,
+    this.bounds = bounds;
 
-		init: function (entity, x, y, w, h, bounds) {
+    this.track(entity);
+  }
 
-			this.w = w;
-			this.h = h;
-			this.zoom = 1;
+  track(entity) {
 
-			this.bounds = bounds;
+    this.entity = entity;
+    this.x = entity.x - (this.w / this.zoom / 2) + (entity.w / this.zoom / 2);
+    this.y = entity.y - (this.h / this.zoom / 2) + (entity.h / this.zoom / 2);
 
-			this.track(entity);
+    this.constrainToBounds();
 
-		},
+  }
 
-		track: function (entity) {
+  constrainToBounds() {
 
-			this.entity = entity;
-			this.x = entity.x - (this.w / this.zoom / 2) + (entity.w / this.zoom / 2);
-			this.y = entity.y - (this.h / this.zoom / 2);
+    if (this.x < 0) {
+      this.x = 0;
+    }
+    if (this.x > 0) {
+      if (this.bounds && this.x + this.w / this.zoom > this.bounds[0]) {
+        this.x = this.bounds[0] - this.w / this.zoom;
+      }
+    }
+    if (this.y < 0) {
+      this.y = 0;
+    }
+    if (this.y > 0) {
+      if (this.bounds && this.y + this.h / this.zoom > this.bounds[1]) {
+        this.y = this.bounds[1] - this.h / this.zoom;
+      }
+    }
 
-			this.constrainToBounds();
+  }
 
-		},
+  tick() {
+    const center = math.center(this, this.zoom);
+    const e = this.entity;
+    const xr = this.xRange;
+    const yr = this.yRange;
 
-		constrainToBounds: function () {
+    if (e.x < center.x - xr) {
+      this.x = e.x - (this.w / this.zoom / 2) + xr;
+    }
+    if (e.x + e.w > center.x + xr) {
+      this.x = e.x + e.w - (this.w / this.zoom / 2) - xr;
+    }
+    if (e.y < center.y - yr) {
+      this.y = e.y - (this.h / this.zoom / 2) + yr;
+    }
+    if (e.y + e.h > center.y + yr) {
+      this.y = e.y + e.h - (this.h / this.zoom / 2) - yr;
+    }
 
-			if (this.x < 0) {
-				this.x = 0;
-			}
-			if (this.x > 0) {
-				if (this.bounds && this.x + this.w / this.zoom > this.bounds[0]) {
-					this.x = this.bounds[0] - this.w / this.zoom;
-				}
-			}
-			if (this.y < 0) {
-				this.y = 0;
-			}
-			if (this.y > 0) {
-				if (this.bounds && this.y + this.h / this.zoom > this.bounds[1]) {
-					this.y = this.bounds[1] - this.h / this.zoom;
-				}
-			}
+    this.constrainToBounds();
 
-		},
+  }
 
-		tick: function () {
+  debugOutline() {
+    return {
+      render: function (gfx, cam) {
+        const center = math.center(cam, cam.zoom);
 
-			var center = Ω.math.center(this, this.zoom),
-				e = this.entity,
-				xr = this.xRange,
-				yr = this.yRange;
+        gfx.ctx.strokeStyle = "rgba(200, 255, 255, 1)";
+        gfx.ctx.strokeRect(
+          center.x - cam.xRange,
+          center.y - cam.yRange,
+          cam.xRange * 2,
+          cam.yRange * 2);
+      }
+    }
+  }
+  
+  render(gfx, renderables) {
+    if (this.debug) renderables = renderables.concat([this.debugOutline()]);
 
-			if(e.x < center.x - xr) {
-				this.x = e.x - (this.w / this.zoom / 2) + xr;
-			}
-			if(e.x + e.w > center.x + xr) {
-				this.x = e.x + e.w - (this.w / this.zoom / 2) - xr;
-			}
-			if(e.y < center.y - yr) {
-				this.y = e.y - (this.h / this.zoom / 2) + yr;
-			}
-			if(e.y + e.h > center.y + yr) {
-				this.y = e.y + e.h - (this.h / this.zoom / 2) - yr;
-			}
+    super.render(gfx,renderables);
+  }
+}
 
-			this.constrainToBounds();
+module.exports = TrackingCamera;
 
-		},
-
-		render: function (gfx, renderables) {
-
-			if (!this.debug) {
-				this._super(gfx, renderables);
-				return;
-			}
-
-			this._super(gfx, renderables.concat([{
-				render: function (gfx, cam) {
-
-					var center = Ω.math.center(cam, cam.zoom);
-
-					gfx.ctx.strokeStyle = "rgba(200, 255, 255, 1)";
-					gfx.ctx.strokeRect(
-						center.x - cam.xRange,
-						center.y - cam.yRange,
-						cam.xRange * 2,
-						cam.yRange * 2);
-
-				}
-			}]));
-
-		}
-
-	});
-
-	Ω.TrackingCamera = TrackingCamera;
-
-}(window.Ω));

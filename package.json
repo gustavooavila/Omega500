@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/gustavooavila/Omega500#readme",
   "devDependencies": {
-    "@babel/cli": "^7.7.5",
-    "@babel/core": "^7.7.5",
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.6"
   }
 }

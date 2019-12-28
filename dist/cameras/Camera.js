@@ -1,37 +1,56 @@
 "use strict";
 
-(function (Ω) {
-  "use strict";
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  var Camera = Ω.Class.extend({
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-    debug: false,
-    init: function init(x, y, w, h) {
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Camera =
+/*#__PURE__*/
+function () {
+  function Camera() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var w = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var h = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+    _classCallCheck(this, Camera);
+
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.zoom = 1;
+    this.debug = false;
+  }
+
+  _createClass(Camera, [{
+    key: "tick",
+    value: function tick() {}
+  }, {
+    key: "moveTo",
+    value: function moveTo(x, y) {
       this.x = x;
       this.y = y;
-      this.w = w;
-      this.h = h;
-      this.zoom = 1;
-    },
-    tick: function tick() {},
-    moveTo: function moveTo(x, y) {
-      this.x = x;
-      this.y = y;
-    },
-    moveBy: function moveBy(x, y) {
+    }
+  }, {
+    key: "moveBy",
+    value: function moveBy(x, y) {
       this.x += x;
       this.y += y;
-    },
-    renderPre: function renderPre(gfx) {
+    }
+  }, {
+    key: "renderPre",
+    value: function renderPre(gfx) {
       var c = gfx.ctx;
       c.save();
       c.scale(this.zoom, this.zoom);
       c.translate(-Math.round(this.x), -Math.round(this.y));
-    },
-    renderPost: function renderPost(gfx) {
+    }
+  }, {
+    key: "renderPost",
+    value: function renderPost(gfx) {
       var c = gfx.ctx;
 
       if (this.debug) {
@@ -40,27 +59,34 @@
       }
 
       c.restore();
-    },
-    render: function render(gfx, renderables, noPrePost) {
-      var self = this;
+    }
+  }, {
+    key: "render",
+    value: function render(gfx, renderables, noPrePost) {
+      var _this = this;
+
       !noPrePost && this.renderPre(gfx);
       renderables // Flatten to an array
-      .reduce(function (ac, e) {
+      .reduce(function (acc, e) {
         if (Array.isArray(e)) {
-          return ac.concat(e);
+          return acc.concat(e);
         }
 
-        ac.push(e);
-        return ac;
-      }, []) // Remove out-of-view entites
+        acc.push(e);
+        return acc;
+      }, []) // Remove out-of-view entities
+      // TODO: maybe use quad tree for this?
       .filter(function (r) {
-        return r.repeat || !(r.x + r.w < self.x || r.y + r.h < self.y || r.x > self.x + self.w / self.zoom || r.y > self.y + self.h / self.zoom);
+        return r.repeat || !(r.x + r.w < _this.x || r.y + r.h < _this.y || r.x > _this.x + _this.w / _this.zoom || r.y > _this.y + _this.h / _this.zoom);
       }) // Draw 'em
       .forEach(function (r) {
-        r.render(gfx, self);
+        r.render(gfx, _this);
       });
       !noPrePost && this.renderPost(gfx);
     }
-  });
-  Ω.Camera = Camera;
-})(window.Ω);
+  }]);
+
+  return Camera;
+}();
+
+module.exports = Camera;

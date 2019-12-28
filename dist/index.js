@@ -24,7 +24,9 @@ var utils = require("./utils/index");
 
 var Game = require("./Game");
 
+var Cameras = require("./cameras/index");
+
 global.Ω = Ω;
-module.exports = _objectSpread({}, Ω, {}, anim, {}, assets, {}, entities, {}, gfx, {}, input, {}, screens, {}, utils, {
+module.exports = _objectSpread({}, Ω, {}, anim, {}, assets, {}, entities, {}, gfx, {}, input, {}, screens, {}, utils, {}, Cameras, {
   Game: Game
 });
