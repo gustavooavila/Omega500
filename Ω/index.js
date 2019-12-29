@@ -9,6 +9,7 @@ const screens = require("./screens/index");
 const utils = require("./utils/index");
 const Game = require("./Game");
 const Cameras = require("./cameras/index");
+const text = require("./text/index");
 
 global.Ω = Ω;
 
@@ -22,5 +23,6 @@ module.exports = {
   ...screens,
   ...utils,
   ...Cameras,
+  ...text,
   Game,
 }
