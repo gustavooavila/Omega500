@@ -62,10 +62,11 @@ function () {
     }
   }, {
     key: "render",
-    value: function render(gfx, renderables, noPrePost) {
+    value: function render(gfx, renderables) {
       var _this = this;
 
-      !noPrePost && this.renderPre(gfx);
+      var prePost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      prePost && this.renderPre(gfx);
       renderables // Flatten to an array
       .reduce(function (acc, e) {
         if (Array.isArray(e)) {
@@ -82,7 +83,7 @@ function () {
       .forEach(function (r) {
         r.render(gfx, _this);
       });
-      !noPrePost && this.renderPost(gfx);
+      prePost && this.renderPost(gfx);
     }
   }]);
 

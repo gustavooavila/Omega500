@@ -41,8 +41,9 @@ function (_Camera) {
     _classCallCheck(this, TrackingCamera);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(TrackingCamera).call(this, 0, 0, w, h));
-    _this.xRange = 40;
-    _this.yRange = 30;
+    _this.xRange = entity.w;
+    _this.yRange = entity.h;
+    _this.zoom = 1;
     _this.bounds = bounds;
 
     _this.track(entity);
@@ -61,21 +62,17 @@ function (_Camera) {
   }, {
     key: "constrainToBounds",
     value: function constrainToBounds() {
-      if (this.x < 0) {
+      if (this.x <= 0) {
         this.x = 0;
-      }
-
-      if (this.x > 0) {
+      } else {
         if (this.bounds && this.x + this.w / this.zoom > this.bounds[0]) {
           this.x = this.bounds[0] - this.w / this.zoom;
         }
       }
 
-      if (this.y < 0) {
+      if (this.y <= 0) {
         this.y = 0;
-      }
-
-      if (this.y > 0) {
+      } else {
         if (this.bounds && this.y + this.h / this.zoom > this.bounds[1]) {
           this.y = this.bounds[1] - this.h / this.zoom;
         }
@@ -121,9 +118,10 @@ function (_Camera) {
   }, {
     key: "render",
     value: function render(gfx, renderables) {
+      var prePost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
       if (this.debug) renderables = renderables.concat([this.debugOutline()]);
 
-      _get(_getPrototypeOf(TrackingCamera.prototype), "render", this).call(this, gfx, renderables);
+      _get(_getPrototypeOf(TrackingCamera.prototype), "render", this).call(this, gfx, renderables, prePost);
     }
   }]);
 

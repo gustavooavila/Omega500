@@ -1,31 +1,50 @@
 "use strict";
 
-(function (Ω) {
-  "use strict";
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  var Map = Ω.Class.extend({
-    x: 0,
-    // Position required for camera rendering check
-    y: 0,
-    walkable: 0,
-    repeat: false,
-    parallax: 0,
-    init: function init(sheet, cells, walkable) {
-      this.sheet = sheet;
-      this.walkable = walkable || 0;
-      this.populate(cells || [[]]);
-    },
-    tick: function tick() {
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var math = require("../utils/math");
+
+var Map =
+/*#__PURE__*/
+function () {
+  function Map(sheet) {
+    var cells = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [[]];
+    var walkable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, Map);
+
+    this.x = 0; // Position required for camera rendering check
+
+    this.y = 0;
+    this.walkable = 0;
+    this.repeat = false;
+    this.parallax = 0;
+    this.sheet = sheet;
+    this.walkable = walkable;
+    this.populate(cells);
+  }
+
+  _createClass(Map, [{
+    key: "tick",
+    value: function tick() {
       return true;
-    },
-    populate: function populate(cells) {
+    }
+  }, {
+    key: "populate",
+    value: function populate(cells) {
       this.cells = cells;
       this.cellH = this.cells.length;
       this.cellW = this.cells[0].length;
       this.h = this.cellH * this.sheet.h;
       this.w = this.cellW * this.sheet.w;
-    },
-    render: function render(gfx, camera) {
+    }
+  }, {
+    key: "render",
+    value: function render(gfx, camera) {
       if (!camera) {
         camera = {
           x: 0,
@@ -36,17 +55,17 @@
         };
       }
 
-      var tw = this.sheet.w,
-          th = this.sheet.h,
-          cellW = this.sheet.cellW,
-          cellH = this.sheet.cellH,
-          stx = (camera.x - camera.x * this.parallax) / tw | 0,
-          sty = (camera.y - camera.y * this.parallax) / th | 0,
-          endx = stx + (camera.w / camera.zoom / tw | 0) + 1,
-          endy = sty + (camera.h / camera.zoom / th | 0) + 1,
-          j,
-          i,
-          cell;
+      var tw = this.sheet.w;
+      var th = this.sheet.h;
+      var cellW = this.sheet.cellW;
+      var cellH = this.sheet.cellH;
+      var stx = (camera.x - camera.x * this.parallax) / tw | 0;
+      var sty = (camera.y - camera.y * this.parallax) / th | 0;
+      var endx = stx + (camera.w / camera.zoom / tw | 0) + 1;
+      var endy = sty + (camera.h / camera.zoom / th | 0) + 1;
+      var j;
+      var i;
+      var cell;
 
       if (this.parallax) {
         gfx.ctx.save();
@@ -76,10 +95,12 @@
       if (this.parallax) {
         gfx.ctx.restore();
       }
-    },
-    getBlockCell: function getBlockCell(block) {
-      var row = block[1] / this.sheet.h | 0,
-          col = block[0] / this.sheet.w | 0;
+    }
+  }, {
+    key: "getBlockCell",
+    value: function getBlockCell(block) {
+      var row = block[1] / this.sheet.h | 0;
+      var col = block[0] / this.sheet.w | 0;
 
       if (row < 0 || row > this.cellH - 1) {
         row = -1;
@@ -90,30 +111,40 @@
       }
 
       return [col, row];
-    },
-    getCellPixels: function getCellPixels(block) {
-      var row = block[1] * this.sheet.h,
-          col = block[0] * this.sheet.w;
+    }
+  }, {
+    key: "getCellPixels",
+    value: function getCellPixels(block) {
+      var row = block[1] * this.sheet.h;
+      var col = block[0] * this.sheet.w;
       return [col, row];
-    },
-    getBlock: function getBlock(block) {
-      var row = block[1] / this.sheet.h | 0,
-          col = block[0] / this.sheet.w | 0;
+    }
+  }, {
+    key: "getBlock",
+    value: function getBlock(block) {
+      var row = block[1] / this.sheet.h | 0;
+      var col = block[0] / this.sheet.w | 0;
 
       if (row < 0 || row > this.cellH - 1) {
         return;
       }
 
       return this.cells[row][col];
-    },
-    getBlocks: function getBlocks(blocks) {
+    }
+  }, {
+    key: "getBlocks",
+    value: function getBlocks(blocks) {
       return blocks.map(this.getBlock, this);
-    },
-    getBlockEdge: function getBlockEdge(pos, vertical) {
+    }
+  }, {
+    key: "getBlockEdge",
+    value: function getBlockEdge(pos, vertical) {
       var snapTo = vertical ? this.sheet.h : this.sheet.w;
-      return Ω.math.snap(pos, snapTo);
-    },
-    setBlock: function setBlock(pos, block) {
+      return math.snap(pos, snapTo);
+    }
+  }, {
+    key: "setBlock",
+    value: function setBlock(pos, block) {
       var row = pos[1] / this.sheet.h | 0,
           col = pos[0] / this.sheet.w | 0;
 
@@ -122,8 +153,10 @@
       }
 
       this.cells[row][col] = block;
-    },
-    setBlockCell: function setBlockCell(pos, block) {
+    }
+  }, {
+    key: "setBlockCell",
+    value: function setBlockCell(pos, block) {
       var row = pos[1],
           col = pos[0];
 
@@ -132,101 +165,10 @@
       }
 
       this.cells[row][col] = block;
-    },
-
-    /*
-    	Maps an image (via a color map) to tiles.
-    			The color map is a key of the r,g,b,a to tile index. For example:
-    				{
-    			"0,0,0,250": 0,
-    			"250,0,0,250": 1
-    		}
-    			Please note, due to me not being bothered figuring out retina displays and Safari's
-    	non-support of imageSmoothingEnabled, I have simple Math.floor-ed all color components!
-    	So each component ranges from 0 to 250 in increments of 10.
-    			This function also returns colors X & Y that weren't mapped to tiles
-    	(so you can use for entities etc)
-    */
-    imgToCells: function imgToCells(img, colourMap, cb, flipFlags) {
-      var self = this,
-          entities = {},
-          autoColMap = {},
-          autoColIdx = 0;
-
-      function canvToCells(canvas) {
-        var ctx = canvas.getContext("2d"),
-            pix = ctx.webkitGetImageDataHD ? ctx.webkitGetImageDataHD(0, 0, canvas.width, canvas.height).data : ctx.getImageData(0, 0, canvas.width, canvas.height).data,
-            pixOff,
-            cells = [],
-            i,
-            j,
-            col,
-            key,
-            round = function round(val) {
-          return Math.floor(val / 10) * 10;
-        };
-
-        for (j = 0; j < canvas.height; j++) {
-          cells.push([]);
-
-          for (i = 0; i < canvas.width; i++) {
-            pixOff = j * canvas.width * 4 + i * 4;
-
-            if (pix[pixOff + 3] !== 0) {
-              key = round(pix[pixOff]) + "," + round(pix[pixOff + 1]) + "," + round(pix[pixOff + 2]) + "," + round(pix[pixOff + 3]);
-
-              if (colourMap) {
-                // Get the tile from the colour map
-                col = colourMap[key];
-
-                if (!col) {
-                  // This colour is not a tile. It must be an entity...
-                  if (entities[key]) {
-                    entities[key].push([i, j]);
-                  } else {
-                    entities[key] = [[i, j]];
-                  }
-
-                  col = 0;
-                }
-
-                cells[cells.length - 1].push(col);
-              } else {
-                // No supplied color map.
-                // Just set tile indexes to colours, as we see them
-                col = autoColMap[key];
-
-                if (!col) {
-                  autoColMap[key] = ++autoColIdx;
-                }
-
-                cells[cells.length - 1].push(col);
-              }
-            } else {
-              cells[cells.length - 1].push(0);
-            }
-          }
-        }
-
-        self.populate(cells);
-        return entities;
-      }
-
-      var unmapped;
-
-      if (typeof img === "string") {
-        // Load first
-        Ω.gfx.loadImage(img, function (canvas) {
-          document.body.appendChild(canvas);
-          unmapped = canvToCells(canvas);
-          cb && cb(self, unmapped);
-        }, flipFlags || 0);
-      } else {
-        unmapped = canvToCells(img);
-      }
-
-      return unmapped;
     }
-  });
-  Ω.Map = Map;
-})(window.Ω);
+  }]);
+
+  return Map;
+}();
+
+module.exports = Map;

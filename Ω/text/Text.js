@@ -10,7 +10,7 @@ class Text {
   }
 
   setText(text) {
-    this.text = text;
+    this.text = `${text}`;
     this.updateSize();
   }
 

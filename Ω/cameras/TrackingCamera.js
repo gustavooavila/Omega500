@@ -5,8 +5,9 @@ class TrackingCamera extends Camera {
   constructor(entity, w = 0, h = 0, bounds) {
     super(0, 0, w, h);
 
-    this.xRange = 40;
-    this.yRange = 30;
+    this.xRange = entity.w;
+    this.yRange = entity.h;
+    this.zoom = 1;
 
     this.bounds = bounds;
 
@@ -25,18 +26,16 @@ class TrackingCamera extends Camera {
 
   constrainToBounds() {
 
-    if (this.x < 0) {
+    if (this.x <= 0) {
       this.x = 0;
-    }
-    if (this.x > 0) {
+    } else {
       if (this.bounds && this.x + this.w / this.zoom > this.bounds[0]) {
         this.x = this.bounds[0] - this.w / this.zoom;
       }
     }
-    if (this.y < 0) {
+    if (this.y <= 0) {
       this.y = 0;
-    }
-    if (this.y > 0) {
+    } else {
       if (this.bounds && this.y + this.h / this.zoom > this.bounds[1]) {
         this.y = this.bounds[1] - this.h / this.zoom;
       }
@@ -81,11 +80,11 @@ class TrackingCamera extends Camera {
       }
     }
   }
-  
-  render(gfx, renderables) {
+
+  render(gfx, renderables, prePost = true) {
     if (this.debug) renderables = renderables.concat([this.debugOutline()]);
 
-    super.render(gfx,renderables);
+    super.render(gfx, renderables, prePost);
   }
 }
 

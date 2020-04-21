@@ -10,6 +10,7 @@ const utils = require("./utils/index");
 const Game = require("./Game");
 const Cameras = require("./cameras/index");
 const text = require("./text/index");
+const maps = require("./maps/index");
 
 global.Ω = Ω;
 
@@ -24,5 +25,6 @@ module.exports = {
   ...utils,
   ...Cameras,
   ...text,
+  ...maps,
   Game,
 }

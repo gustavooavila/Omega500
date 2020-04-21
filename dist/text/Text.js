@@ -26,7 +26,7 @@ function () {
   _createClass(Text, [{
     key: "setText",
     value: function setText(text) {
-      this.text = text;
+      this.text = "".concat(text);
       this.updateSize();
     }
   }, {

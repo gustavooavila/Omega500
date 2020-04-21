@@ -23,7 +23,7 @@ class Camera {
 
   renderPre(gfx) {
     const c = gfx.ctx;
-    
+
     c.save();
     c.scale(this.zoom, this.zoom);
     c.translate(-(Math.round(this.x)), -(Math.round(this.y)));
@@ -40,8 +40,8 @@ class Camera {
     c.restore();
   }
 
-  render(gfx, renderables, noPrePost) {
-    !noPrePost && this.renderPre(gfx);
+  render(gfx, renderables, prePost = true) {
+    prePost && this.renderPre(gfx);
 
     renderables
       // Flatten to an array
@@ -65,7 +65,7 @@ class Camera {
       .forEach((r) => {
         r.render(gfx, this);
       });
-    !noPrePost && this.renderPost(gfx);
+    prePost && this.renderPost(gfx);
   }
 
 }

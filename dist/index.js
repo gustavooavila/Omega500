@@ -28,7 +28,9 @@ var Cameras = require("./cameras/index");
 
 var text = require("./text/index");
 
+var maps = require("./maps/index");
+
 global.Ω = Ω;
-module.exports = _objectSpread({}, Ω, {}, anim, {}, assets, {}, entities, {}, gfx, {}, input, {}, screens, {}, utils, {}, Cameras, {}, text, {
+module.exports = _objectSpread({}, Ω, {}, anim, {}, assets, {}, entities, {}, gfx, {}, input, {}, screens, {}, utils, {}, Cameras, {}, text, {}, maps, {
   Game: Game
 });
