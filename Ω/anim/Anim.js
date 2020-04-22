@@ -24,7 +24,7 @@ class Anim {
     this.rewound = false;
 
     if (diff > this.speed) {
-      this.frameTime = Ω.utils.now() + (Math.min(this.speed, diff - this.speed));
+      this.frameTime = utils.now() + (Math.min(this.speed, diff - this.speed));
       if (++this.curFrame > this.frames.length - 1) {
         this.curFrame = 0;
         this.rewound = true;
@@ -37,7 +37,7 @@ class Anim {
 
   reset() {
     this.curFrame = 0;
-    this.frameTime = Ω.utils.now();
+    this.frameTime = utils.now();
   }
 
   render(gfx, x, y) {
