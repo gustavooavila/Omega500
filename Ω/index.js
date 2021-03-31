@@ -12,10 +12,8 @@ const Cameras = require("./cameras/index");
 const text = require("./text/index");
 const maps = require("./maps/index");
 
-global.Ω = Ω;
-
-module.exports = {
-  ...Ω,
+const modules = {
+    ...Ω,
   ...anim,
   ...assets,
   ...entities,
@@ -28,3 +26,5 @@ module.exports = {
   ...maps,
   Game,
 }
+global.Ω = modules;
+module.exports = modules

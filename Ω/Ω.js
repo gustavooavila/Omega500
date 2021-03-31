@@ -30,7 +30,7 @@ const Ω = {
 
     if (!preloading) {
       return function () {
-        // console.log("preloading finished!", name);
+        console.log("preloading finished!", name);
       };
     }
 
